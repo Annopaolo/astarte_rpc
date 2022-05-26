@@ -77,14 +77,22 @@ defmodule Astarte.RPC.AMQP.Client do
     correlation_id = gen_correlation_id()
     prefixed_routing_key = prefix <> routing_key
 
+    message_options = [
+      reply_to: reply_queue,
+      correlation_id: correlation_id
+    ]
+
+    config_message_options = Config.amqp_message_options!()
+
     AMQP.Basic.publish(
       chan,
       "",
       prefixed_routing_key,
       ser_payload,
-      reply_to: reply_queue,
-      correlation_id: correlation_id
+      Keyword.merge(message_options, config_message_options)
     )
+
+    Logger.info("Publishing with expiration #{inspect(config_message_options)}")
 
     new_pending = Map.put(pending, correlation_id, from)
 
@@ -104,7 +112,19 @@ defmodule Astarte.RPC.AMQP.Client do
 
     prefixed_routing_key = prefix <> routing_key
 
-    AMQP.Basic.publish(chan, "", prefixed_routing_key, ser_payload)
+    # [expiration: 100]
+    config_message_options = Config.amqp_message_options!()
+
+    AMQP.Basic.publish(
+      chan,
+      "",
+      prefixed_routing_key,
+      ser_payload,
+      config_message_options
+    )
+
+    Logger.info("Publishing with expiration #{inspect(config_message_options)}")
+
     {:noreply, state}
   end
 

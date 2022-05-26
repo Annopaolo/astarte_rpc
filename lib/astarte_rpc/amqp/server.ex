@@ -165,14 +165,17 @@ defmodule Astarte.RPC.AMQP.Server do
   end
 
   defp maybe_reply({:ok, reply}, chan, reply_to, correlation_id) do
+    # TODO: should we add message options here, too?
     AMQP.Basic.publish(chan, "", reply_to, reply, correlation_id: correlation_id)
   end
 
   defp maybe_reply({:error, reason}, chan, reply_to, correlation_id) when is_binary(reason) do
+    # TODO: should we add message options here, too?
     AMQP.Basic.publish(chan, "", reply_to, "error:" <> reason, correlation_id: correlation_id)
   end
 
   defp maybe_reply({:error, reason}, chan, reply_to, correlation_id) when is_atom(reason) do
+    # TODO: should we add message options here, too?
     AMQP.Basic.publish(
       chan,
       "",

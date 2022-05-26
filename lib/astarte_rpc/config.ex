@@ -94,14 +94,34 @@ defmodule Astarte.RPC.Config do
     os_env: "RPC_AMQP_CONNECTION_SSL_CA_FILE",
     type: :binary
 
+  @envdoc """
+  Expiry for messages in AMQP queues, in milliseconds. If set, even messages with QoS 1 or 2 can be dropped when expired, with possible data loss. Use this only if availability is much more valuable than consistency.
+  """
+  app_env :amqp_message_expiry_ms, :astarte_rpc, :amqp_message_expiry_ms,
+    os_env: "RPC_AMQP_MESSAGE_EXPIRY_MS",
+    type: :integer
+
   @doc "The AMQP queue arguments."
-  @type argument :: {:"x-max-length", integer()} | {:"x-overflow", String.t()}
-  @spec amqp_queue_arguments!() :: [argument]
+  @type queue_argument :: {:"x-max-length", integer()} | {:"x-overflow", String.t()}
+  @spec amqp_queue_arguments!() :: [queue_argument]
   def amqp_queue_arguments! do
     value = amqp_queue_max_length!()
 
     if value > 0 do
       ["x-max-length": value, "x-overflow": "reject-publish"]
+    else
+      []
+    end
+  end
+
+  @doc "The AMQP message arguments."
+  @type message_option :: {:expiration, integer()}
+  @spec amqp_message_options!() :: [message_option]
+  def amqp_message_options! do
+    expiry = amqp_message_expiry_ms!()
+
+    if expiry != nil do
+      [expiration: expiry]
     else
       []
     end
