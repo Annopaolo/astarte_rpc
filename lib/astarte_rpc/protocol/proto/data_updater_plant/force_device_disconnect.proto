@@ -1,7 +1,7 @@
 //
 // This file is part of Astarte.
 //
-// Copyright 2017 Ispirata Srl
+// Copyright 2022 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,17 +18,8 @@
 
 syntax = "proto3";
 
-import "install_volatile_trigger.proto";
-import "delete_volatile_trigger.proto";
-import "force_device_disconnect.proto";
-
-message Call {
-    int32 version = 1;
-
-    oneof call {
-        InstallVolatileTrigger install_volatile_trigger = 2;
-        DeleteVolatileTrigger delete_volatile_trigger = 3;
-        ForceDeviceDisconnect force_device_disconnect = 4;
-    }
+message ForceDeviceDisconnect {
+    string realm_name = 1;
+    string device_id = 2;
+    int64 timestamp = 3;
 }
-
