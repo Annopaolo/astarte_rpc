@@ -95,6 +95,11 @@ defmodule Astarte.RPC.AMQP.Server do
   end
 
   defp handle(handler, chan, payload, meta) do
+    IO.inspect(handler)
+    IO.inspect(chan)
+    IO.inspect(payload)
+    IO.inspect(meta)
+
     apply_handle_rpc(handler, payload)
     |> ack_or_reject(chan, meta.delivery_tag)
     |> maybe_reply(chan, meta.reply_to, meta.correlation_id)

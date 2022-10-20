@@ -32,6 +32,9 @@ defmodule Astarte.RPC.AMQP.Client do
   end
 
   def rpc_call(ser_payload, destination, timeout \\ 5000) when is_binary(ser_payload) do
+    Logger.info("rpc_call ser_payload: #{inspect(ser_payload)}")
+    Logger.info("rpc_call destination: #{inspect(destination)}")
+
     GenServer.call(__MODULE__, {:rpc, ser_payload, destination}, timeout)
   end
 
@@ -77,13 +80,28 @@ defmodule Astarte.RPC.AMQP.Client do
     correlation_id = gen_correlation_id()
     prefixed_routing_key = prefix <> routing_key
 
-    AMQP.Basic.publish(
-      chan,
-      "",
-      prefixed_routing_key,
-      ser_payload,
-      reply_to: reply_queue,
-      correlation_id: correlation_id
+    Logger.info(
+      "Publishing: #{inspect(ser_payload)} with routing_key #{prefixed_routing_key} and cid #{
+        inspect(correlation_id)
+      }",
+      tag: "handle_call_rpc_before_publish"
+    )
+
+    r =
+      AMQP.Basic.publish(
+        chan,
+        "",
+        prefixed_routing_key,
+        ser_payload,
+        reply_to: reply_queue,
+        correlation_id: correlation_id
+      )
+
+    Logger.info(
+      "Published: #{inspect(ser_payload)} with routing_key #{prefixed_routing_key} and cid #{
+        inspect(correlation_id)
+      } with result #{inspect(r)}",
+      tag: "handle_call_rpc_after_publish"
     )
 
     new_pending = Map.put(pending, correlation_id, from)
@@ -118,7 +136,7 @@ defmodule Astarte.RPC.AMQP.Client do
     Logger.warn("RabbitMQ connection lost. Trying to reconnect...")
 
     # Reply to the pending requests with a temporary error
-    Enum.each(state.pending_reqs, fn _corr_id, caller ->
+    Enum.each(state.pending_reqs, fn {_corr_id, caller} ->
       GenServer.reply(caller, {:error, :retry})
     end)
 
