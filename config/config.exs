@@ -4,9 +4,9 @@ use Mix.Config
 
 # lager is used by rabbit_common.
 # Silent it by setting the higher loglevel.
-config :lager,
-  error_logger_redirect: false,
-  handlers: [level: :critical]
+# config :lager,
+#   error_logger_redirect: false,
+#   handlers: [level: :critical]
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
