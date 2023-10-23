@@ -26,4 +26,5 @@ message UpdateRealm {
     optional int32 replication_factor = 4;
     optional ReplicationClass replication_class = 5;
     map<string, int32> datacenter_replication_factors = 6;
+    optional int64 device_registration_limit = 7;
 }
